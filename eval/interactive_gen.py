@@ -94,7 +94,7 @@ def get_emb(args, kwargs):
 
 from lib.utils import shard_model as sm, clean
 
-def main(hf_path, compile, interactive, max_tokens, top_k):
+def main(hf_path, compile, interactive, max_new_tokens, top_k):
     device = "cuda"
     model, model_str = model_from_hf_path(hf_path)
 
@@ -125,13 +125,13 @@ def main(hf_path, compile, interactive, max_tokens, top_k):
     if not sharded:
         past_kv = StaticCache(model.config,
                               1,
-                              2*args.max_new_tokens,
+                              2*max_new_tokens,
                               device=0,
                               dtype=model.dtype)
     else:
         past_kv = StaticCache(model.config,
                               1,
-                              2*args.max_new_tokens,
+                              2*max_new_tokens,
                               layer_device_map=layer_device_map,
                               dtype=model.dtype)
 
@@ -188,7 +188,7 @@ def main(hf_path, compile, interactive, max_tokens, top_k):
         if not interactive:
             callback = lambda x: x
         ids, text, decode_tps = generate(model, tokenizer, text,
-                                         max_tokens, top_k, callback, past_kv)
+                                         max_new_tokens, top_k, callback, past_kv)
         if not interactive:
             print(text)
             
